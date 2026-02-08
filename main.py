@@ -42,7 +42,10 @@ class IZClient:
         )
         response.raise_for_status()
         self.token = response.json()['token']
-        self._auth_headers = {'Authorization': f'Bearer {self.token}'}
+        self._auth_headers = {
+            'Authorization': f'Bearer {self.token}',
+            'X-Application-Key': application_key,
+        }
 
     def _request(self, method: str, path: str, **kwargs):
         """Make an authenticated request to the API."""
