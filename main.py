@@ -143,7 +143,12 @@ def main():
     )
 
     user_data = client.get('/user-data')
-    print(f'User has {user_data["analysisBalance"]} remaining uploads this billing period')
+    tier_name = user_data['tierName']
+    print(f'User is on the {tier_name} tier of service')
+    if tier_name and tier_name.lower() == 'platinum':
+        print('User has no restrictions on uploads as a platinum tier subscriber (API rate limits apply)')
+    else:
+        print(f'User has {user_data["analysisBalance"]} remaining uploads this billing period')
 
     upload_id = upload_and_analyze(client, args.image_path)
 
