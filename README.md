@@ -18,12 +18,12 @@ Minimal examples demonstrating the ImageZebra API.
 
 ## Usage
 
-### Image Analysis (`main.py`)
+### Image Analysis (`analysis_example.py`)
 
 Upload an image and retrieve analysis results:
 
 ```bash
-uv run main.py [image_path]
+uv run analysis_example.py [image_path]
 ```
 
 If no image path is provided, defaults to `images/low_res_GT_A.jpg`.

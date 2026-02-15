@@ -1,31 +1,17 @@
-#!/usr/bin/env python
 """
-ImageZebra API Example
+Shared ImageZebra API client and helper functions.
 
-Demonstrates the core workflow for uploading images and retrieving analysis results:
-1. Authenticate with application key + user credentials to obtain a bearer token
-2. Request a presigned URL for S3 upload
-3. Upload the image to S3
-4. Request analysis of the uploaded image
-5. Poll for and display analysis results
-
-Usage:
-    uv run main.py [image_path]
+Provides authenticated access to the ImageZebra API, image upload via S3
+presigned URLs, and polling for analysis results.
 """
-import argparse
 import logging
 import os
-from logging import getLogger
 from pathlib import Path
 from time import sleep
 
 import requests
-from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
-logger = getLogger(__name__)
-
-load_dotenv()
+logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://imagezebra.com/api'
 
@@ -33,8 +19,16 @@ BASE_URL = 'https://imagezebra.com/api'
 class IZClient:
     """Authenticated client for the ImageZebra API."""
 
-    def __init__(self, application_key: str, username: str, password: str):
+    def __init__(
+        self,
+        application_key: str = None,
+        username: str = None,
+        password: str = None,
+    ):
         """Authenticate and store bearer token for subsequent requests."""
+        application_key = application_key or os.getenv('IMAGEZEBRA_APPLICATION_KEY')
+        username = username or os.getenv('IMAGEZEBRA_USERNAME')
+        password = password or os.getenv('IMAGEZEBRA_PASSWORD')
         response = requests.post(
             f'{BASE_URL}/token',
             json={'username': username, 'password': password},
@@ -134,36 +128,3 @@ def get_analysis_results(client: IZClient, upload_id: str) -> None:
         print(f'\n{metric_group["name"]}\n{"-" * 80}')
         for metric in metric_group['metrics']:
             print(f'{metric["name"]:40}{metric["stars"]} stars, passing: {metric["isPassing"]}')
-
-
-def main():
-    parser = argparse.ArgumentParser(description='Upload an image to ImageZebra for analysis.')
-    parser.add_argument(
-        'image_path',
-        nargs='?',
-        default='images/low_res_GT_A.jpg',
-        help='Path to the image file (default: images/low_res_GT_A.jpg)'
-    )
-    args = parser.parse_args()
-
-    client = IZClient(
-        application_key=os.getenv('IMAGEZEBRA_APPLICATION_KEY'),
-        username=os.getenv('IMAGEZEBRA_USERNAME'),
-        password=os.getenv('IMAGEZEBRA_PASSWORD')
-    )
-
-    user_data = client.get('/user-data')
-    tier_name = user_data['tierName']
-    print(f'User is on the {tier_name} tier of service')
-    if tier_name and tier_name.lower() == 'platinum':
-        print('User has no restrictions on uploads as a platinum tier subscriber (API rate limits apply)')
-    else:
-        print(f'User has {user_data["analysisBalance"]} remaining uploads this billing period')
-
-    upload_id = upload_and_analyze(client, args.image_path)
-
-    get_analysis_results(client, upload_id)
-
-
-if __name__ == '__main__':
-    main()

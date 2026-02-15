@@ -13,16 +13,12 @@ Usage:
 """
 import argparse
 import logging
-import os
-from logging import getLogger
 
 from dotenv import load_dotenv
 
-from main import IZClient, upload_and_analyze, get_analysis_results
+from iz_client import IZClient, upload_and_analyze, get_analysis_results
 
 logging.basicConfig(level=logging.INFO)
-logger = getLogger(__name__)
-
 load_dotenv()
 
 
@@ -36,11 +32,7 @@ def main():
     )
     args = parser.parse_args()
 
-    client = IZClient(
-        application_key=os.getenv('IMAGEZEBRA_APPLICATION_KEY'),
-        username=os.getenv('IMAGEZEBRA_USERNAME'),
-        password=os.getenv('IMAGEZEBRA_PASSWORD'),
-    )
+    client = IZClient()
 
     # Create a target in the library
     target = client.post('/targets', json={
