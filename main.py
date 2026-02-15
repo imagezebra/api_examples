@@ -61,6 +61,8 @@ class IZClient:
             except requests.exceptions.JSONDecodeError:
                 e.response_content = {}
             raise
+        if response.status_code == 204:
+            return None
         return response.json()
 
     def get(self, path: str, **kwargs):
@@ -69,10 +71,17 @@ class IZClient:
     def post(self, path: str, **kwargs):
         return self._request('POST', path, **kwargs)
 
+    def delete(self, path: str, **kwargs):
+        return self._request('DELETE', path, **kwargs)
 
-def upload_and_analyze(client: IZClient, image_path: str) -> str:
+
+def upload_and_analyze(client: IZClient, image_path: str, target_id: str = None) -> str:
     """
     Upload an image and request analysis.
+
+    Args:
+        target_id: Optional target library ID. If omitted, the target type is
+                   auto-detected from the image.
 
     Returns the upload ID for use with get_analysis_results().
     """
@@ -96,7 +105,8 @@ def upload_and_analyze(client: IZClient, image_path: str) -> str:
         logger.info(f'Upload successful!')
 
     logger.info('Requesting analysis')
-    client.post(f'/requests-for-analysis/{presigned_url_response["uploadId"]}')
+    params = {'target_id': target_id} if target_id else {}
+    client.post(f'/requests-for-analysis/{presigned_url_response["uploadId"]}', params=params)
     return presigned_url_response['uploadId']
 
 
