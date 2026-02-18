@@ -6,6 +6,7 @@ presigned URLs, and polling for analysis results.
 """
 import logging
 import os
+from enum import StrEnum
 from pathlib import Path
 from time import sleep
 
@@ -14,6 +15,17 @@ import requests
 logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://imagezebra.com/api'
+
+
+class TargetType(StrEnum):
+    """Supported color target types."""
+    GOLDEN_THREAD_OBJECT_LEVEL = "golden_thread_object_level"
+    GOLDEN_THREAD_DEVICE_LEVEL = "golden_thread_device_level"
+    COLOR_CHECKER_CLASSIC = "color_checker_classic"
+    COLOR_CHECKER_SG = "color_checker_sg"
+    DT_NEXT_GEN_2 = "dt_next_gen_2"
+    FADGI_19264 = "fadgi_19264"
+    REZ_CHECKER = "rez_checker"
 
 
 class IZClient:
